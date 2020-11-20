@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/css/leaflet.pm.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/element-ui/theme-chalk/index.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/css/leaflet.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/css/Control.MiniMap.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/css/map.css"/>
+</head>
+<body>
+<div id="app">
+    <toolStyle
+            :participants="participants"
+            :resources="resources"
+            v-on:resourceUrl="selecetResource"
+    ></toolStyle>
+    <div id="leadletMap" class="map" :style="{height:windowHeight+'px', width:windowWidth+'px'}">
+
+    </div>
+    <Modal
+            v-model="modalExport"
+            title="Export GeoJSON to resource center"
+            @on-ok="save2Resource('formValidate')"
+    >
+        <Form
+                ref="formValidate"
+                :model="formValidate"
+                :rules="ruleValidate"
+                :label-width="80"
+                style="margin-left:20px"
+        >
+            <FormItem label="Name" prop="fileName">
+                <Input v-model="formValidate.fileName" placeholder="*.json" style="width: 350px" />
+            </FormItem>
+            <FormItem label="Description" prop="fileDescription">
+                <Input
+                        v-model="formValidate.fileDescription"
+                        type="textarea"
+                        placeholder="Enter something..."
+                        style="width: 350px"
+                />
+            </FormItem>
+        </Form>
+        <p style="margin-left:30px">
+            Download this data directly.
+            <Button style="margin-left:50px" @click="downloadGeoJson('formValidate')">Download</Button>
+        </p>
+    </Modal>
+<!--    <Modal-->
+<!--            v-model="modalImport"-->
+<!--            title="Import GeoJSON data to resource center and show the data"-->
+<!--            @on-ok="viewData"-->
+<!--            ok-text="OK"-->
+<!--            cancel-text="Cancel"-->
+<!--    >-->
+<!--        <Upload type="drag" :before-upload="handleUpload" action="-" accept=".json, .zip">-->
+<!--            <div style="padding: 20px 0">-->
+<!--                <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>-->
+<!--                <p>-->
+<!--                    Click or drag files here to upload(The file size must control in-->
+<!--                    <span-->
+<!--                            style="color:red"-->
+<!--                    >1GB</span>)-->
+<!--                </p>-->
+<!--            </div>-->
+<!--        </Upload>-->
+<!--        <div v-show="showFile">-->
+<!--          <span id="show-file">-->
+<!--            <i class="ivu-icon ivu-icon-md-document"></i>-->
+<!--            {{uploadDataName}}-->
+<!--          </span>-->
+<!--        </div>-->
+<!--        <br />-->
+<!--    </Modal>-->
+</div>
+</body>
+<script src="/static/js/common/jquery-3.3.1.min.js"></script>
+<script src="/static/js/leaflet.js"></script>
+<script src="/static/js/common/vue.min.js"></script>
+<script src="/static/element-ui/index.js"></script>
+<script src="/static/js/common/axios.min.js"></script>
+<script src="/static/js/Control.MiniMap.min.js"></script>
+<script src="/static/js/leaflet.pm.min.js"></script>
+<script src="/static/js/api/socket.js"></script>
+<script src="/static/js/map.js"></script>
+</html>
