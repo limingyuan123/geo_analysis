@@ -33,7 +33,10 @@ var app = new Vue({
                 fileDescription: [
                     { required: false, message: "Drawing tool", trigger: "blur" }
                 ]
-            }
+            },
+            dialogVisible: false,
+            zoom:"",
+            coordinates:""
         }
     },
     mounted() {
@@ -51,7 +54,7 @@ var app = new Vue({
     },
     beforeDestroy() {
         window.removeEventListener("resize", this.initSize);
-        this.socketApi.close();
+        // this.socketApi.close();
     },
     beforeRouteEnter: (to, from, next) => {
         next(vm => {
@@ -67,7 +70,13 @@ var app = new Vue({
             this.windowHeight = window.innerHeight;
             this.windowWidth = window.innerWidth - 60;
         },
-
+        handleClose(done) {
+            this.$confirm('确认关闭？')
+                .then(_ => {
+                    done();
+                })
+                .catch(_ => {});
+        },
         initMap() {
             this.tdtVectorMap =
                 "http://t0.tianditu.gov.cn/vec_w/wmts?tk=d6b0b78f412853967d91042483385d2c" +
@@ -323,11 +332,6 @@ var app = new Vue({
                                         description: "map tool data",
                                         pathURL: "/GeoProblemSolving/resource/upload/" + dataName
                                     };
-                                    this.socketApi.sendSock(
-                                        this.send_content,
-                                        this.getSocketConnect
-                                    );
-
                                     // 初始化formValidation
                                     this.formValidate = {
                                         fileName: "",
@@ -393,7 +397,6 @@ var app = new Vue({
                             description: "map tool data",
                             pathURL: "/GeoProblemSolving/resource/upload/" + dataName
                         };
-                        this.socketApi.sendSock(this.send_content, this.getSocketConnect);
                     }
                 })
                 .catch(err => {
@@ -459,7 +462,6 @@ var app = new Vue({
                         type: "edit",
                         layer: _this.drawingLayerGroup.toGeoJSON()
                     };
-                    _this.socketApi.sendSock(_this.send_content, _this.getSocketConnect);
                 });
             });
         },
@@ -499,7 +501,6 @@ var app = new Vue({
                         type: "overlay",
                         layer: e.name
                     };
-                    this.socketApi.sendSock(this.send_content, this.getSocketConnect);
                 }
                 isLayerCtrlClick = false;
             });
@@ -511,7 +512,6 @@ var app = new Vue({
                         type: "zoom",
                         zoom: this.map.getZoom()
                     };
-                    this.socketApi.sendSock(this.send_content, this.getSocketConnect);
                     isZoomControl = false;
                     isDoubleClick = false;
                 }
@@ -524,21 +524,10 @@ var app = new Vue({
                         type: "move",
                         center: this.map.getCenter()
                     };
-                    this.socketApi.sendSock(this.send_content, this.getSocketConnect);
                 }
                 isMouseDown = false;
             });
 
-            // 裁剪事件
-            this.map.on("pm:cut", e => {
-                // this.drawingLayerGroup.removeLayer(e.originalLayer);
-                // this.drawingLayerGroup.addLayer(e.layer);
-                // this.send_content={
-                //     type:"cut",
-                //     layer: this.drawingLayerGroup.toGeoJSON()
-                //   }
-                // this.socketApi.sendSock(this.send_content, this.getSocketConnect);
-            });
 
             // 删除事件
             let _this = this;
@@ -548,7 +537,6 @@ var app = new Vue({
                     type: "remove",
                     layer: _this.drawingLayerGroup.toGeoJSON()
                 };
-                this.socketApi.sendSock(this.send_content, this.getSocketConnect);
             });
 
             this.map.on("pm:globaleditmodetoggled", e => {
@@ -584,140 +572,11 @@ var app = new Vue({
                         layer: e.layer.toGeoJSON()
                     };
                 }
-                alert("e.target._zoom: " + e.target._zoom + "      geometry.coordinates: " + this.send_content.layer.geometry.coordinates);
-                // this.socketApi.sendSock(this.send_content, this.getSocketConnect);
+                this.dialogVisible = true;
+                this.zoom = e.target._zoom;
+                this.coordinates = this.send_content.layer.geometry.coordinates;
+                // alert("e.target._zoom: " + e.target._zoom + "      geometry.coordinates: " + this.send_content.layer.geometry.coordinates);
             });
-        },
-        getSocketConnect(data) {
-            let socketMsg = data;
-
-            if (socketMsg.type === "test") {
-                console.log(socketMsg.content);
-            } else if (socketMsg.type === "members") {
-                let members = data.message
-                    .replace("[", "")
-                    .replace("]", "")
-                    .replace(/\s/g, "")
-                    .split(",");
-                this.olParticipants = members;
-                this.olParticipantChange();
-            } else {
-                //判断消息的发出者
-
-                switch (socketMsg.type) {
-                    case "zoom": {
-                        this.map.setZoom(socketMsg.zoom);
-                        break;
-                    }
-                    case "move": {
-                        this.map.panTo(socketMsg.center);
-                        break;
-                    }
-                    case "overlay": {
-                        try {
-                            this.map.removeLayer(this.baseLayers["Terrain map"]);
-                        } catch (e) {}
-                        try {
-                            this.map.removeLayer(this.baseLayers["Satellite map"]);
-                        } catch (e) {}
-                        try {
-                            this.map.removeLayer(this.baseLayers["Vector map"]);
-                        } catch (e) {}
-                        this.baseLayers[socketMsg.layer].addTo(this.map);
-                        break;
-                    }
-                    case "remove": {
-                        this.drawingLayerGroup.clearLayers();
-                        let geoJson = socketMsg.layer;
-                        let geoJsonLayer = L.geoJSON(geoJson, {
-                            style: function(feature) {}
-                        }).bindPopup(function(layer) {
-                            // return layer.feature.properties.description;
-                        });
-                        this.loadFeatures(geoJsonLayer);
-                        break;
-                    }
-                    case "edit": {
-                        this.drawingLayerGroup.clearLayers();
-                        let geoJson = socketMsg.layer;
-                        let geoJsonLayer = L.geoJSON(geoJson, {
-                            style: function(feature) {}
-                        }).bindPopup(function(layer) {
-                            // return layer.feature.properties.description;
-                        });
-                        this.loadFeatures(geoJsonLayer);
-                        break;
-                    }
-                    case "add": {
-                        let drawingLayer = null;
-                        if (socketMsg.shape == "Circle") {
-                            drawingLayer = L.circle(socketMsg.layer[0], {
-                                radius: socketMsg.layer[1]
-                            });
-                        } else {
-                            drawingLayer = L.geoJSON(socketMsg.layer, {
-                                style: function(feature) {}
-                            }).bindPopup(function(layer) {});
-                        }
-                        this.drawingLayerGroup.addLayer(drawingLayer);
-                        break;
-                    }
-                    case "cut": {
-                        // this.drawingLayerGroup.clearLayers();
-                        // let geoJson = socketMsg.layer;
-                        // let geoJsonLayer = L.geoJSON(geoJson, {
-                        //   style: function (feature) {
-                        //   }
-                        // }).bindPopup(function (layer) {
-                        //     return layer.feature.properties.description;
-                        // });
-                        // this.drawingLayerGroup.addLayer(geoJsonLayer);
-                        // break;
-                    }
-                    case "resourcesUpdate": {
-                        let dataItem = {
-                            name: socketMsg.name,
-                            description: socketMsg.description,
-                            pathURL: socketMsg.pathURL
-                        };
-                        this.resources.push(dataItem);
-
-                        var that = this;
-                        var xhr = new XMLHttpRequest();
-                        xhr.open("GET", socketMsg.pathURL, true);
-                        xhr.onload = function(e) {
-                            if (this.status == 200) {
-                                var file = JSON.parse(this.response);
-
-                                let geoJsonLayer = L.geoJSON(file, {
-                                    style: function(feature) {
-                                        return { color: "green" };
-                                    }
-                                }).bindPopup(function(layer) {
-                                    return layer.feature.properties.description;
-                                });
-                                that.loadFeatures(geoJsonLayer);
-                            }
-                        };
-                        xhr.send();
-                        break;
-                    }
-                    case "selectdata": {
-                        this.dataUrl = socketMsg.pathURL;
-                        this.viewData();
-                        break;
-                    }
-                    case "resourcesSave": {
-                        let dataItem = {
-                            name: socketMsg.name,
-                            description: socketMsg.description,
-                            pathURL: socketMsg.pathURL
-                        };
-                        this.resources.push(dataItem);
-                        break;
-                    }
-                }
-            }
         },
         olParticipantChange() {
             let userIndex = -1;
@@ -790,25 +649,6 @@ var app = new Vue({
                 }
             }
         },
-        // startWebSocket() {
-        //     if (this.pageParams.pageId == undefined || this.pageParams.pageId == "") {
-        //         this.$Message.error("Lose the information of current step.");
-        //         return false;
-        //     }
-        //
-        //     let roomId = this.pageParams.pageId;
-        //     this.socketApi.initWebSocket(
-        //         "MapServer/" + roomId,
-        //         this.$store.state.IP_Port
-        //     );
-        //
-        //     this.send_content = {
-        //         type: "test",
-        //         from: "Test",
-        //         content: "TestChat"
-        //     };
-        //     this.socketApi.sendSock(this.send_content, this.getSocketConnect);
-        // },
         getResources() {
             if (this.pageParams.pageId == undefined || this.pageParams.pageId == "") {
                 this.$Message.error("Lose the information of current step.");
@@ -847,8 +687,6 @@ var app = new Vue({
                 type: "selectdata",
                 pathURL: this.dataUrl
             };
-            this.socketApi.sendSock(this.send_content, this.getSocketConnect);
-
             this.viewData();
         }
     }
