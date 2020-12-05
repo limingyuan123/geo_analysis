@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>GeoAnalysis</title>
     <link rel="stylesheet" type="text/css" media="screen" href="/static/css/leaflet.pm.css"/>
     <link rel="stylesheet" type="text/css" media="screen" href="/static/element-ui/theme-chalk/index.css">
     <link rel="stylesheet" type="text/css" media="screen" href="/static/css/leaflet.css"/>
@@ -28,37 +28,6 @@
 </style>
 <body>
 <div id="app">
-<!--    <div class="leftMenu">-->
-<!--        <Modal-->
-<!--            v-model="modalExport"-->
-<!--            title="Export GeoJSON to resource center"-->
-<!--            @on-ok="save2Resource('formValidate')"-->
-<!--    >-->
-<!--        <Form-->
-<!--                ref="formValidate"-->
-<!--                :model="formValidate"-->
-<!--                :rules="ruleValidate"-->
-<!--                :label-width="80"-->
-<!--                style="margin-left:20px"-->
-<!--        >-->
-<!--            <FormItem label="Name" prop="fileName">-->
-<!--                <Input v-model="formValidate.fileName" placeholder="*.json" style="width: 350px" />-->
-<!--            </FormItem>-->
-<!--            <FormItem label="Description" prop="fileDescription">-->
-<!--                <Input-->
-<!--                        v-model="formValidate.fileDescription"-->
-<!--                        type="textarea"-->
-<!--                        placeholder="Enter something..."-->
-<!--                        style="width: 350px"-->
-<!--                />-->
-<!--            </FormItem>-->
-<!--        </Form>-->
-<!--        <p style="margin-left:30px">-->
-<!--            Download this data directly.-->
-<!--            <Button style="margin-left:50px" @click="downloadGeoJson('formValidate')">Download</Button>-->
-<!--        </p>-->
-<!--    </Modal>-->
-<!--    </div>-->
     <toolStyle
             :participants="participants"
             :resources="resources"
@@ -67,25 +36,83 @@
     ></toolStyle>
     <div id="leadletMap" class="map" :style="{height:windowHeight+'px', width:windowWidth+'px'}">
     </div>
-<!--    <el-button type="text" @click="dialogVisible = true">点击打开 Dialog</el-button>-->
 
     <el-dialog
-            title="Information"
+            title="Operation"
             :visible.sync="dialogVisible"
-            width="30%"
-            :before-close="handleClose">
-        <div>
-            <span>Current zoom level : </span>
-            <i>{{zoom}}</i>
-        </div>
-        <div>
-            <span>Current coordinates: </span>
-            <i>{{coordinates}}</i>
-        </div>
-        <span slot="footer" class="dialog-footer">
-            <el-button @click="dialogVisible = false">Cancel</el-button>
-            <el-button type="primary" @click="dialogVisible = false">Confirm</el-button>
-        </span>
+            width="80%"
+            :before-close="handleClose"
+            >
+<!--        <div class="container" style="">-->
+        <el-tabs v-model="activeName" type="card" @tab-click="handleClick" stretch="true">
+            <el-tab-pane label="GeoJSON Download" name="first">
+                <div class="leftInfo" style="margin-left: 40px;display: inline-block;width: 45%;float: left;">
+                    <div>
+                        <pre lang="json">{{geoJSON}}</pre>
+                    </div>
+                </div>
+                <div class="rightInfo" style="text-align:right;margin:0px auto 0px auto;display: inline-block;width: 45%">
+                    <div style="float: left;margin-left: 20px;margin-bottom: 20px">
+                        <strong>Current zoom level : </strong>
+                        <i>{{zoom}}</i>
+                    </div>
+                    <Modal
+                            v-model="modalExport"
+                            title="Export GeoJSON to resource center"
+                            @on-ok="save2Resource('formValidate')"
+                            style="display: inline-block;float: left;"
+                    >
+                        <el-form
+                                ref="formValidate"
+                                :model="formValidate"
+                                :rules="ruleValidate"
+                                :label-width="80"
+                                style="margin-left:20px"
+                        >
+                            <el-form-item label="Name" prop="fileName">
+                                <el-input v-model="formValidate.fileName" placeholder="*.json"/>
+                            </el-form-item>
+                            <el-form-item label="Description" prop="fileDescription">
+                                <el-input
+                                        v-model="formValidate.fileDescription"
+                                        type="textarea"
+                                        placeholder="Enter something..."
+                                />
+                            </el-form-item>
+                        </el-form>
+                        <p style="margin-left:30px">
+                            Download this data directly.
+                            <el-button type="primary" style="margin-left:50px" @click="downloadGeoJson('formValidate')">Download</el-button>
+                        </p>
+                    </Modal>
+                </div>
+            </el-tab-pane>
+            <el-tab-pane label="Invoke" name="second">
+                <el-tabs type="border-card" stretch="true">
+                    <el-tab-pane>
+                        <span slot="label">
+                            <i class="el-icon-date"></i>
+                            瓦片下载
+                        </span>
+
+                        <div style="text-align: center" v-loading="loading">
+                            <span>Show selected tiles</span>
+                            <el-button type="primary" @click="tileSplice()">Invoke</el-button>
+                        </div>
+                    </el-tab-pane>
+                    <el-tab-pane label="DEM 分析1">DEM 分析1</el-tab-pane>
+                    <el-tab-pane label="DEM 分析2">DEM 分析2</el-tab-pane>
+                    <el-tab-pane label="DEM 分析3">DEM 分析3</el-tab-pane>
+                </el-tabs>
+            </el-tab-pane>
+        </el-tabs>
+
+<!--        </div>-->
+
+<!--        <span slot="footer" class="dialog-footer" style="float:right;">-->
+<!--            <el-button @click="dialogVisible = false">Cancel</el-button>-->
+<!--            <el-button type="primary" @click="dialogVisible = false">Confirm</el-button>-->
+<!--        </span>-->
     </el-dialog>
 
 

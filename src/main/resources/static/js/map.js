@@ -36,7 +36,10 @@ var app = new Vue({
             },
             dialogVisible: false,
             zoom:"",
-            coordinates:""
+            coordinates:"",
+            geoJSON:"",
+            activeName: 'first',
+            loading: false
         }
     },
     mounted() {
@@ -64,6 +67,9 @@ var app = new Vue({
         });
     },
     methods: {
+        handleClick(tab, event) {
+            console.log(tab, event);
+        },
         initSize() {
             $("#app").css("min-width", "0");
             $("#app").css("min-height", "0");
@@ -572,10 +578,18 @@ var app = new Vue({
                         layer: e.layer.toGeoJSON()
                     };
                 }
+                this.geoJSON = JSON.stringify(e.layer.toGeoJSON(),null,4);
                 this.dialogVisible = true;
                 this.zoom = e.target._zoom;
                 this.coordinates = this.send_content.layer.geometry.coordinates;
-                // alert("e.target._zoom: " + e.target._zoom + "      geometry.coordinates: " + this.send_content.layer.geometry.coordinates);
+
+                //输出数据
+                // var featuresSet = { type: "FeatureCollection", features: [] };
+                this.geojsonBlob = new Blob(
+                    [this.geoJSON],
+                    {type:"application/json"}
+                );
+                this.modalExport = true;
             });
         },
         olParticipantChange() {
@@ -688,6 +702,27 @@ var app = new Vue({
                 pathURL: this.dataUrl
             };
             this.viewData();
+        },
+        tileSplice(){
+            this.loading = true;
+            let file = new File([this.geoJSON],'geojson.txt',{
+                type:'text/plain'
+            });
+            let formdata = new FormData();
+            formdata.append("geojson",file);
+            window.location.href = "/tileSplice";
+            this.loading = false;
+            // $.ajax({
+            //     url:"/tileSplice",
+            //     type:"POST",
+            //     processData:false,
+            //     contentType:false,
+            //     data:formdata,
+            //     success:(result)=>{
+            //         this.loading = false;
+            //         // alert("It's success");
+            //     }
+            // })
         }
     }
 })
