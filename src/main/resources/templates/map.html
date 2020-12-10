@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>GeoAnalysis</title>
+<!--    <link rel="icon" type="image/x-icon" href="/static/img/logo.png">-->
     <link rel="stylesheet" type="text/css" media="screen" href="/static/css/leaflet.pm.css"/>
     <link rel="stylesheet" type="text/css" media="screen" href="/static/element-ui/theme-chalk/index.css">
     <link rel="stylesheet" type="text/css" media="screen" href="/static/css/leaflet.css"/>
@@ -10,20 +11,12 @@
     <link rel="stylesheet" type="text/css" media="screen" href="/static/css/map.css"/>
 </head>
 <style>
-    .leftMenu{
-        float: right;
-        height: 100%;
-        position: absolute;
-        z-index: 2;
-        width: 30%;
-        background: white;
-    }
     .map{
         position: relative;
         z-index: 1;
     }
-    .toolbar{
-
+    body{
+        margin:0;
     }
 </style>
 <body>
@@ -34,7 +27,7 @@
             v-on:resourceUrl="selecetResource"
             class="toolbar"
     ></toolStyle>
-    <div id="leadletMap" class="map" :style="{height:windowHeight+'px', width:windowWidth+'px'}">
+    <div id="leadletMap" class="map" :style="{height:windowHeight+'px'}">
     </div>
 
     <el-dialog
@@ -59,7 +52,6 @@
                     <Modal
                             v-model="modalExport"
                             title="Export GeoJSON to resource center"
-                            @on-ok="save2Resource('formValidate')"
                             style="display: inline-block;float: left;"
                     >
                         <el-form
