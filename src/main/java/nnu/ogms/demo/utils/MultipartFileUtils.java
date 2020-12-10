@@ -1,4 +1,4 @@
-package utils;
+package nnu.ogms.demo.utils;
 
 import org.springframework.web.multipart.MultipartFile;
 

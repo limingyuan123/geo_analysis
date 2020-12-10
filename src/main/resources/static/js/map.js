@@ -703,26 +703,62 @@ var app = new Vue({
             };
             this.viewData();
         },
-        tileSplice(){
+        tileSplice1(){
+            let _this = this;
             this.loading = true;
             let file = new File([this.geoJSON],'geojson.txt',{
                 type:'text/plain'
             });
             let formdata = new FormData();
             formdata.append("geojson",file);
-            window.location.href = "/tileSplice";
+            $.ajax({
+                url:"/tileSplice",
+                type:"POST",
+                processData:false,
+                contentType:false,
+                data:formdata,
+                success:(result)=>{
+                    this.loading = false;
+                    if(result.code === 0){
+                        var oid = result.data;
+                        //下载数据
+                        window.location.href = "/downloadResult/" + oid;
+                    }
+                    _this.$message({
+                        message:"Invoke success",
+                        type:"success"
+                    });
+                }
+            })
+        },
+        tileSplice(){
+            let _this = this;
+            this.loading = true;
+            let file = new File([this.geoJSON],'geojson.txt',{
+                type:'text/plain'
+            });
+            let formdata = new FormData();
+            formdata.append("geojson",file);
             this.loading = false;
-            // $.ajax({
-            //     url:"/tileSplice",
-            //     type:"POST",
-            //     processData:false,
-            //     contentType:false,
-            //     data:formdata,
-            //     success:(result)=>{
-            //         this.loading = false;
-            //         // alert("It's success");
-            //     }
-            // })
+            $.ajax({
+                url:"/tileSplice1",
+                type:"POST",
+                processData:false,
+                contentType:false,
+                data:formdata,
+                success:(result)=>{
+                    this.loading = false;
+                    if(result.code === 0){
+                        var oid = result.data.data;
+                        //下载数据
+                        window.location.href = "/downloadResult/" + oid;
+                    }
+                    _this.$message({
+                        message:"Invoke success",
+                        type:"success"
+                    });
+                }
+            })
         }
     }
 })
