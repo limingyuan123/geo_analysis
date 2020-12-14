@@ -160,7 +160,6 @@ public class GeoAnalysisController {
 
     @RequestMapping(value = "/downloadResult/{oid}", method = RequestMethod.GET)
     public void downloadResult(@PathVariable(value = "oid") String oid,HttpServletResponse response) throws UnsupportedEncodingException {
-//        File file1 = new File("C:\\Users\\HP\\Desktop\\文件\\AI.png");
         ClipResult clipResult = clipResultDao.findFirstByOid(oid);
         String outPath = clipResult.getOutPath();
         String fileName = clipResult.getFileName();

@@ -36,7 +36,6 @@
             width="80%"
             :before-close="handleClose"
             >
-<!--        <div class="container" style="">-->
         <el-tabs v-model="activeName" type="card" @tab-click="handleClick" stretch="true">
             <el-tab-pane label="GeoJSON Download" name="first">
                 <div class="leftInfo" style="margin-left: 40px;display: inline-block;width: 45%;float: left;">
@@ -98,13 +97,6 @@
                 </el-tabs>
             </el-tab-pane>
         </el-tabs>
-
-<!--        </div>-->
-
-<!--        <span slot="footer" class="dialog-footer" style="float:right;">-->
-<!--            <el-button @click="dialogVisible = false">Cancel</el-button>-->
-<!--            <el-button type="primary" @click="dialogVisible = false">Confirm</el-button>-->
-<!--        </span>-->
     </el-dialog>
 
 

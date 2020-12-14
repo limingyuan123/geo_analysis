@@ -15,7 +15,6 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class GeoAnalysisService {
     public void downloadFile(HttpServletResponse response, File file, String fileName) throws UnsupportedEncodingException {
-//        boolean downLoadLog = false;
         log.info("文件大小" + file.length());
 
         response.setContentType("application/force-download");
@@ -34,8 +33,6 @@ public class GeoAnalysisService {
                 outputStream.write(buffer, 0, i);
                 i = bis.read(buffer);
             }
-//            downLoadLog = true;
-            //return "下载成功";
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
